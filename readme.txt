@@ -73,7 +73,7 @@ Linux下使用libreoffice把doc转换成Pdf	http://blog.csdn.net/pwtitle/article
 jodconvert 默认使用 openoffice，对比libreoffice 与openoffice
 pdf.js 试试用  jquery.media.js 代替
 	
-
+1226：完成转换并显示，待完成持久化、异常处理
 
 
 
