@@ -1,5 +1,6 @@
 package com.jansing.office.utils;
 
+import com.jansing.web.utils.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.util.Base64Utils;
@@ -10,9 +11,9 @@ import java.io.*;
  * Created by jansing on 16-12-23.
  */
 public class FileUtil {
-    public static void mkdirsIfNotExisted(String dir){
+    public static void mkdirsIfNotExisted(String dir) {
         File file = new File(dir);
-        if(!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
     }
@@ -33,7 +34,7 @@ public class FileUtil {
         copy(is, new FileOutputStream(file));
 
         //check sha256
-        if(StringUtil.isNotBlank(sha256)){
+        if (StringUtil.isNotBlank(sha256)) {
             checkSha256(file, sha256);
         }
         return file;

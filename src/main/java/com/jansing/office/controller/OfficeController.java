@@ -1,6 +1,6 @@
 package com.jansing.office.controller;
 
-import com.jansing.office.utils.HttpClientUtil;
+import com.jansing.web.utils.HttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -18,5 +18,5 @@ public abstract class OfficeController {
     //取文件的回调servlet
     protected static String callbackServletPath = "/wopi/files";
 
-    public abstract String view(Model model, HttpServletRequest req, HttpServletResponse resp)throws Exception;
+    public abstract String view(Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception;
 }

@@ -3,7 +3,7 @@ package com.jansing;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jansing.office.utils.JsonMapper;
+import com.jansing.common.mapper.JsonMapper;
 import org.junit.Test;
 
 import java.util.ArrayList;

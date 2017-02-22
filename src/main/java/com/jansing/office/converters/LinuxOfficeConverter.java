@@ -1,6 +1,6 @@
 package com.jansing.office.converters;
 
-import com.jansing.office.utils.Collections3;
+import com.jansing.common.utils.Collections3;
 import com.jansing.office.utils.ProcessUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;

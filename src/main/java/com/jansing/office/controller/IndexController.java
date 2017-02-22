@@ -1,7 +1,9 @@
 package com.jansing.office.controller;
 
 import com.google.common.collect.Lists;
-import com.jansing.office.utils.Global;
+import com.jansing.common.config.Global;
+import com.jansing.office.entities.ConvertLog;
+import com.jansing.office.service.ConvertLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +22,19 @@ import java.util.List;
 @Controller
 public class IndexController {
     private static final Logger logger = LoggerFactory.getLogger(IndexController.class);
+    public static final String OS_LINUX = "linux";
+    public static final String OS_WIN = "win";
     @Autowired
     private WinOfficeController winOfficeController;
     @Autowired
     private LinuxOfficeController linuxOfficeController;
+    @Autowired
+    private ConvertLogService convertLogService;
     private List<OfficeController> serverList;
 
     private Boolean winFirst = Boolean.valueOf(Global.getConfig("convert.win.first"));
-    private Boolean winOn = Boolean.valueOf(Global.getConfig("convert.win.on"));
-    private Boolean linuxOn = Boolean.valueOf(Global.getConfig("convert.linux.on"));
+    protected Boolean winOn = Boolean.valueOf(Global.getConfig("convert.win.on"));
+    protected Boolean linuxOn = Boolean.valueOf(Global.getConfig("convert.linux.on"));
 
     private void initServerList() {
         serverList = Lists.newArrayList();
@@ -53,13 +59,46 @@ public class IndexController {
      */
     @RequestMapping(value = "/view", method = RequestMethod.GET)
     public String view(Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ConvertLog convertLog = new ConvertLog();
+        long start = System.currentTimeMillis();
+        req.setAttribute("convertLog", convertLog);
+        String os = req.getParameter("os");
+        String viewer = os == null ? commonView(model, req, resp) : specialView(os, model, req, resp);
+        convertLog.setCost(System.currentTimeMillis() - start);
+        convertLogService.save(convertLog);
+        return viewer;
+    }
+
+    private String commonView(Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         if (serverList == null) {
             initServerList();
         }
         if (serverList.size() == 0) {
             logger.error("没有找到提供转换服务的服务器！请检查配置");
+            throw new Exception("没有找到提供转换服务的服务器！");
         }
-        //todo 怎么实现如果失败就尝试serverList的下一个？
         return serverList.get(0).view(model, req, resp);
     }
+
+    private String specialView(String os, Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        if (OS_WIN.equals(os)) {
+            if (winOn) {
+                return winOfficeController.view(model, req, resp);
+            } else {
+                logger.warn("不支持win操作系统的转换平台，使用默认平台转换");
+                return commonView(model, req, resp);
+            }
+        } else if (OS_LINUX.equals(os)) {
+            if (linuxOn) {
+                return linuxOfficeController.view(model, req, resp);
+            } else {
+                logger.warn("不支持linux操作系统的转换平台，使用默认平台转换");
+                return commonView(model, req, resp);
+            }
+        }
+        logger.warn("未知操作系统的转换平台，使用默认平台转换");
+        return serverList.get(0).view(model, req, resp);
+    }
+
+
 }

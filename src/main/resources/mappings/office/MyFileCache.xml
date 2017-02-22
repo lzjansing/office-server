@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jansing.office.dao.MyFileCacheDao">
+
+    <sql id="myFileCacheColumns">
+        a.id AS "id",
+        a.my_file_id AS "myFile.id",
+        a.origin_path AS "originPath",
+        a.convert_path AS "convertPath",
+        a.servlet_path AS "servletPath",
+        a.valid AS "valid",
+        a.create_date AS "createDate"
+    </sql>
+
+    <sql id="myFileCacheJoins">
+    </sql>
+
+    <select id="get" resultType="MyFileCache">
+        SELECT
+        <include refid="myFileCacheColumns"/>
+        FROM my_file_cache a
+        <include refid="myFileCacheJoins"/>
+        WHERE a.my_file_id=#{myFile.id} AND a.valid=#{YES}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO my_file_cache(
+        id,
+        my_file_id,
+        origin_path,
+        convert_path,
+        servlet_path,
+        valid,
+        create_date
+        ) VALUES (
+        #{id},
+        #{myFile.id},
+        #{originPath},
+        #{convertPath},
+        #{servletPath},
+        #{valid},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE my_file_cache SET
+        origin_path = #{originPath},
+        convert_path = #{convertPath},
+        servlet_path = #{servletPath}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE my_file_cache SET
+        valid = #{NO}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

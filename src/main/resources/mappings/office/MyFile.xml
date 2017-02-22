@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jansing.office.dao.MyFileDao">
+
+    <sql id="myFileColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.ext AS "ext",
+        a.size AS "size",
+        a.char_set AS "characterSet",
+        a.sha256 AS "sha256",
+        a.md5 AS "md5",
+        a.app_id AS "appId",
+        a.app_file_id AS "appFileId",
+        a.valid AS "valid",
+        a.create_date AS "createDate"
+    </sql>
+
+    <sql id="myFileJoins">
+    </sql>
+    <select id="get" resultType="MyFile">
+        SELECT
+        <include refid="myFileColumns"/>
+        FROM my_file a
+        <include refid="myFileJoins"/>
+        WHERE ext = #{ext} AND size=#{size} AND sha256=#{sha256} AND valid=#{YES}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO my_file(
+        id,
+        name,
+        ext,
+        size,
+        char_set,
+        sha256,
+        md5,
+        app_id,
+        app_file_id,
+        valid,
+        create_date
+        ) VALUES (
+        #{id},
+        #{name},
+        #{ext},
+        #{size},
+        #{characterSet},
+        #{sha256},
+        #{md5},
+        #{appId},
+        #{appFileId},
+        #{valid},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="delete">
+        UPDATE my_file SET
+        valid = #{NO}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

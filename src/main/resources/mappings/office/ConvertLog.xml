@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jansing.office.dao.ConvertLogDao">
+
+    <sql id="convertLogColumns">
+        a.id AS "id",
+        a.my_file_id AS "myFile.id",
+        a.cost AS "cost",
+        a.use_cache AS "useCache",
+        a.convert_cost AS "convertCost",
+        a.valid AS "valid",
+        a.create_date AS "createDate"
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO convert_log(
+        id,
+        my_file_id,
+        cost,
+        use_cache,
+        convert_cost,
+        valid,
+        create_date
+        ) VALUES (
+        #{id},
+        #{myFile.id},
+        #{cost},
+        #{useCache},
+        #{convertCost},
+        #{valid},
+        #{createDate}
+        )
+    </insert>
+
+</mapper>

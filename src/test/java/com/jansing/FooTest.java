@@ -1,10 +1,13 @@
 package com.jansing;
 
 import com.google.common.collect.Lists;
-import com.jansing.office.utils.Collections3;
+import com.jansing.common.utils.Collections3;
+import com.jansing.office.utils.FileUtil;
+import com.jansing.web.utils.HttpClientUtil;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -34,5 +37,29 @@ public class FooTest {
         System.out.println(LocalDate.now());
     }
 
+
+    @Test
+    public void test04(){
+        HttpClientUtil httpClientUtil = new HttpClientUtil(false, null, 600000);
+        InputStream is = null;
+        String url = "http://202.104.32.195:83/s/base/register/household/!dcc613683b6f9eda6cebc2be355e93b2/household.excel?id=711933&gridid=_1910";
+        String filename = "1.xls";
+        try {
+            is = httpClientUtil.doGetForInputStream(url, null);
+            String dir = "/home/jansing/test";
+            FileUtil.mkdirsIfNotExisted(dir);
+            File file = new File(dir + File.separator + filename);
+            OutputStream os = new FileOutputStream(file);
+            try {
+                IOUtils.copy(is, os);
+            } finally {
+                IOUtils.closeQuietly(is);
+                IOUtils.closeQuietly(os);
+            }
+        } catch (Exception e) {
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+    }
 
 }

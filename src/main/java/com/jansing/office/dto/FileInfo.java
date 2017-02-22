@@ -1,6 +1,7 @@
 package com.jansing.office.dto;
 
-import com.jansing.office.utils.JsonMapper;
+
+import com.jansing.common.mapper.JsonMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,17 +18,18 @@ public class FileInfo {
     private String ownerId;
     private String sha256;
 
-    public FileInfo(){}
+    public FileInfo() {
+    }
 
-    public FileInfo(Map<String, Object> params){
+    public FileInfo(Map<String, Object> params) {
         this.name = (String) params.get("BaseFileName");
-        this.size = (Integer)params.get("Size");
+        this.size = (Integer) params.get("Size");
         this.version = (String) params.get("Version");
         this.ownerId = (String) params.get("OwnerId");
         this.sha256 = (String) params.get("SHA256");
     }
 
-    public FileInfo(String json){
+    public FileInfo(String json) {
         this(JsonMapper.getInstance().fromJson(json, HashMap.class));
     }
 
