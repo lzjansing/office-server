@@ -1,9 +1,9 @@
 package com.jansing;
 
 import com.google.common.collect.Lists;
-import com.jansing.common.utils.Collections3;
-import com.jansing.office.utils.FileUtil;
+import com.jansing.web.utils.FileUtil;
 import com.jansing.web.utils.HttpClientUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -60,6 +60,11 @@ public class FooTest {
         } finally {
             IOUtils.closeQuietly(is);
         }
+    }
+
+    @Test
+    public void test05() {
+        System.out.println(FilenameUtils.getExtension("/homre/jffds/x.pdf"));
     }
 
 }

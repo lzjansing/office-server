@@ -2,7 +2,7 @@ package com.jansing.office.controller;
 
 import com.google.common.collect.Maps;
 import com.jansing.common.config.Global;
-import com.jansing.office.utils.FileUtil;
+import com.jansing.web.utils.FileUtil;
 import com.jansing.web.utils.StringUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

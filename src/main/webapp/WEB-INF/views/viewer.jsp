@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <html>
 <head>
     <title>WEB OFFICE</title>
@@ -19,7 +20,7 @@
     <script src="${ctxFront}/plugins/pdf/debugger.js"></script>
     <script type="text/javascript">
         //TODO 在viewer.js中用到
-        var file = ctx+'${file eq null or file eq ''?'/index.pdf':file}';
+        var file = "${file ne null and fn:startsWith(file, 'http://')?file:ctx+'index.pdf'}";
     </script>
     <script src="${ctxFront}/plugins/pdf/l10n.js"></script>
     <script src="${ctxFront}/plugins/pdf/viewer.js"></script>

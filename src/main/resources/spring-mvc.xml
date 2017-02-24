@@ -35,7 +35,7 @@
     </bean>
 
     <!-- 定义无Controller的path<->view直接映射 -->
-    <mvc:view-controller path="/" view-name="redirect:${web.view.index}"/>
+    <mvc:view-controller path="/" view-name="redirect:/"/>
 
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="exceptionMappings">
