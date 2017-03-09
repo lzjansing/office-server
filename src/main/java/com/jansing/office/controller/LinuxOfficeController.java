@@ -1,14 +1,18 @@
 package com.jansing.office.controller;
 
+import com.beust.jcommander.internal.Maps;
 import com.jansing.common.config.Global;
+import com.jansing.common.mapper.JsonMapper;
+import com.jansing.common.utils.Message;
 import com.jansing.office.converters.LinuxOfficeConverter;
 import com.jansing.office.entities.ConvertLog;
 import com.jansing.office.entities.MyFile;
 import com.jansing.office.entities.MyFileCache;
 import com.jansing.office.service.MyFileCacheService;
 import com.jansing.office.service.MyFileService;
-import com.jansing.office.utils.FileUtil;
-import org.apache.commons.io.FilenameUtils;
+import com.jansing.web.utils.FileTransmitUtil;
+import com.jansing.web.utils.FileUtil;
+import com.jansing.web.utils.StringUtil;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * Created by jansing on 16-12-24.
@@ -35,83 +40,77 @@ public class LinuxOfficeController extends OfficeController {
     @Autowired
     private MyFileCacheService myFileCacheService;
 
+    private static final String CONVERT_PATH = Global.getConfig("convertPath");
+
     @Override
     @RequestMapping(value = "/linuxView", method = RequestMethod.GET)
     public String view(Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         ConvertLog convertLog = (ConvertLog) req.getAttribute("convertLog");
         String fileId = req.getParameter("fileId");
-        //文件所在服务器路径
+        //host = "http://127.0.0.1:8080/swopi/"
         String remoteContextPath = req.getParameter("host");
         String fileInfoUrl = remoteContextPath + callbackServletPath + "/" + fileId;
         String fileUrl = fileInfoUrl + "/contents";
         //保存文件的路径
-        String convertPath = req.getSession().getServletContext().getRealPath(Global.getConfig("convertPath"))
+        String convertPath = FileTransmitUtil.getRealPath(req, CONVERT_PATH)
                 + File.separator + LocalDate.now().toString();
 
         MyFile myFile = new MyFile(httpClientUtil.doGet(fileInfoUrl, null));
-        //检查是否已存在，即曾经请求过这个文件
+        MyFileCache cache = ensureOriginExits(req, myFile, fileUrl, convertPath);
+        long convertStart = System.currentTimeMillis();
+        ensureConvertExits(req, cache, convertPath);
+        long convertEnd = System.currentTimeMillis();
+
+        if(cache.getId()==null || !cache.getConvertPath().equals(myFileCacheService.get(cache).getConvertPath())){
+            myFileCacheService.save(cache);
+            convertLog.setConvertCost(convertEnd-convertStart);
+        }
+
+        model.addAttribute("fileName", myFile.getName());
+        model.addAttribute("file", cache.getConvertPath());
+        if(LinuxOfficeConverter.isXls(myFile.getExt())){
+            return "xlsViewer";
+        }
+        return "/viewer";
+    }
+
+    public MyFileCache ensureOriginExits(HttpServletRequest req, MyFile myFile, String fileUrl, String savePath) throws Exception {
         MyFileCache cache = new MyFileCache();
         MyFile old = myFileService.get(myFile);
         if (old != null && old.getId() != null) {
             cache.setMyFile(old);
-            convertLog.setMyFile(old);
             MyFileCache tmpCache = myFileCacheService.get(cache);
             if (tmpCache != null) {
-                if (tmpCache.getConvertPath() != null && new File(tmpCache.getConvertPath()).exists()) {
-                    convertLog.setUseCache(true);
-                    model.addAttribute("file", tmpCache.getConvertPath().substring(tmpCache.getConvertPath().indexOf(Global.getConfig("convertPath"))));
-                    return "/viewer";
+                if (FileTransmitUtil.askFileExist(tmpCache.getOriginPath(), req)) {
+                    return tmpCache;
                 }
-                tmpCache.setConvertPath(null);
-                if (tmpCache.getOriginPath() != null && new File(tmpCache.getOriginPath()).exists()) {
-                    long start = System.currentTimeMillis();
-                    convertFile(tmpCache, convertPath);
-                    convertLog.setConvertCost(System.currentTimeMillis() - start);
-                    myFileCacheService.save(tmpCache);
-                    model.addAttribute("file", tmpCache.getConvertPath().substring(tmpCache.getConvertPath().indexOf(Global.getConfig("convertPath"))));
-                    return "/viewer";
-                }
-                tmpCache.setOriginPath(null);
                 cache = tmpCache;
             }
-            cache.setMyFile(old);
-        } else {
+            myFile = old;
+        }else {
             myFileService.save(myFile);
+            myFile = myFileService.get(myFile);
             cache.setMyFile(myFile);
-            convertLog.setMyFile(myFile);
         }
-        //confirm the file exist
-        getFile(fileUrl, convertPath, cache);
-        //confirm the convert exist
-        long start = System.currentTimeMillis();
-        convertFile(cache, convertPath);
-        convertLog.setConvertCost(System.currentTimeMillis() - start);
-        myFileCacheService.save(cache);
-
-        model.addAttribute("file", cache.getConvertPath().substring(cache.getConvertPath().indexOf(Global.getConfig("convertPath"))));
-        return "/viewer";
+        cache.setOriginPath(FileTransmitUtil.getRelativePath(req,
+                getFile(myFile, fileUrl, savePath)));
+        return cache;
     }
 
-    public void convertFile(MyFileCache cache, String convertPath) throws Exception {
-        if (cache.getOriginPath() == null || !new File(cache.getOriginPath()).exists()) {
-            throw new FileNotFoundException("转换失败，要转换的文件不存在！");
-        }
-        if ("pdf".equals(FilenameUtils.getExtension(cache.getOriginPath()))) {
-//            本身就是pdf文档，无需转换
-            cache.setConvertPath(cache.getOriginPath());
-        } else {
-            File pdfFile = LinuxOfficeConverter.convertToPdf(new File(cache.getOriginPath()), convertPath);
-            cache.setConvertPath(pdfFile.getAbsolutePath());
-        }
-    }
-
-
-    public void getFile(String url, String savePath, MyFileCache cache) throws Exception {
+    /**
+     *
+     * @param fileUrl
+     * @param savePath
+     * @param myFile
+     * @return  获取到的文件的绝对路径
+     * @throws Exception
+     */
+    public String getFile(MyFile myFile, String fileUrl, String savePath) throws Exception {
         InputStream is = null;
         try {
-            is = httpClientUtil.doGetForInputStream(url, null);
-            File file = FileUtil.copy(is, savePath, cache.getMyFile().getRealFileName(), cache.getMyFile().getSha256());
-            cache.setOriginPath(file.getAbsolutePath());
+            is = httpClientUtil.doGetForInputStream(fileUrl, null);
+            File file = FileUtil.copy(is, savePath, myFile.getRealFileName(), myFile.getSha256());
+            return file.getAbsolutePath();
         } catch (IOException e) {
             logger.error("不明错误？？" + e.getMessage());
             throw e;
@@ -120,5 +119,21 @@ public class LinuxOfficeController extends OfficeController {
         }
     }
 
+    public void ensureConvertExits(HttpServletRequest req, MyFileCache cache, String savePath) throws Exception {
+        if(!FileTransmitUtil.askFileExist(cache.getConvertPath(), req)){
+            cache.setConvertPath(FileTransmitUtil.getRelativePath(req,
+                    convertFile(FileTransmitUtil.getRealPath(req, cache.getOriginPath()), savePath)));
+        }
+    }
 
+    /**
+     * @param sourcePath  源文件绝对路径
+     * @param convertPath 转换后的文件的绝对路径，不含文件名
+     * @return 转换后的文件的绝对路径，或url(暂不支持)
+     * @throws Exception
+     */
+    public String convertFile(String sourcePath, String convertPath) throws Exception {
+        return LinuxOfficeConverter.convertToPdf(new File(sourcePath), convertPath)
+                .getAbsolutePath();
+    }
 }

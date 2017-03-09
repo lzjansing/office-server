@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <html>
 <head>
     <title>WEB OFFICE</title>
@@ -18,8 +19,19 @@
 
     <script src="${ctxFront}/plugins/pdf/debugger.js"></script>
     <script type="text/javascript">
-        //TODO 在viewer.js中用到
-        var file = ctx+'${file eq null or file eq ''?'/index.pdf':file}';
+        //在viewer.js中用到
+        <c:choose>
+        <c:when test="${file ne null}">
+            var file ="${fn:startsWith(file, 'http://')?file:ctx.concat(file)}";
+        </c:when>
+        <c:otherwise>
+            var file = "${ctx.concat('index.pdf')}";
+        </c:otherwise>
+        </c:choose>
+        //todo
+//        if(file.endsWith('.xls') || file.endsWith(".xlsx")){
+//            window.location.href=file;
+//        }
     </script>
     <script src="${ctxFront}/plugins/pdf/l10n.js"></script>
     <script src="${ctxFront}/plugins/pdf/viewer.js"></script>
@@ -79,10 +91,11 @@
                     <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
                 </button>
 
-                <button id="secondaryOpenFile" class="secondaryToolbarButton openFile visibleLargeView" title="Open File" tabindex="52" data-l10n-id="open_file">
+                <button id="secondaryOpenFile" class="secondaryToolbarButton openFile visibleLargeView hidden" title="Open File" tabindex="52" data-l10n-id="open_file">
                     <span data-l10n-id="open_file_label">Open</span>
                 </button>
 
+                <%--todo 原文件而不是pdf--%>
                 <button id="secondaryPrint" class="secondaryToolbarButton print visibleMediumView" title="Print" tabindex="53" data-l10n-id="print">
                     <span data-l10n-id="print_label">Print</span>
                 </button>
@@ -91,9 +104,13 @@
                     <span data-l10n-id="download_label">Download</span>
                 </button>
 
-                <a href="#" id="secondaryViewBookmark" class="secondaryToolbarButton bookmark visibleSmallView" title="Current view (copy or open in new window)" tabindex="55" data-l10n-id="bookmark">
+                <a href="#" id="secondaryViewBookmark" class="secondaryToolbarButton bookmark visibleSmallView hidden" title="Current view (copy or open in new window)" data-l10n-id="bookmark">
                     <span data-l10n-id="bookmark_label">Current View</span>
                 </a>
+
+                <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="55" data-l10n-id="hand_tool_enable">
+                    <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
+                </button>
 
                 <div class="horizontalToolbarSeparator visibleLargeView"></div>
 
@@ -115,13 +132,9 @@
 
                 <div class="horizontalToolbarSeparator"></div>
 
-                <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="60" data-l10n-id="hand_tool_enable">
-                    <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
-                </button>
+                <%--<div class="horizontalToolbarSeparator"></div>--%>
 
-                <div class="horizontalToolbarSeparator"></div>
-
-                <button id="documentProperties" class="secondaryToolbarButton documentProperties" title="Document Properties…" tabindex="61" data-l10n-id="document_properties">
+                <button id="documentProperties" class="secondaryToolbarButton documentProperties hidden" title="Document Properties…" tabindex="61" data-l10n-id="document_properties">
                     <span data-l10n-id="document_properties_label">Document Properties…</span>
                 </button>
             </div>
@@ -156,7 +169,7 @@
                             <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
                         </button>
 
-                        <button id="openFile" class="toolbarButton openFile hiddenLargeView" title="Open File" tabindex="32" data-l10n-id="open_file">
+                        <button id="openFile" class="toolbarButton openFile hiddenLargeView hidden" title="Open File" tabindex="32" data-l10n-id="open_file">
                             <span data-l10n-id="open_file_label">Open</span>
                         </button>
 
@@ -167,7 +180,7 @@
                         <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
                             <span data-l10n-id="download_label">Download</span>
                         </button>
-                        <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
+                        <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView hidden" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
                             <span data-l10n-id="bookmark_label">Current View</span>
                         </a>
 

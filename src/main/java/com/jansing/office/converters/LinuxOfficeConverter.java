@@ -1,7 +1,10 @@
 package com.jansing.office.converters;
 
 import com.jansing.common.utils.Collections3;
+import com.jansing.common.utils.Message;
 import com.jansing.office.utils.ProcessUtil;
+import com.jansing.web.utils.FileTransmitUtil;
+import com.jansing.web.utils.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -9,49 +12,89 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by jansing on 16-12-17.
  */
 public class LinuxOfficeConverter {
-    private static final Logger logger = Logger.getLogger(LinuxOfficeConverter.class.getName());
-    public static final String EXTENTION_PDF = ".pdf";
+    private static final Logger logger = LoggerFactory.getLogger(LinuxOfficeConverter.class);
+    public static final String EXTENSION_HTML = ".html";
+    public static final String EXTENSION_PDF = ".pdf";
+    public static final String EXTENSION_XLS = ".xls";
+    public static final String EXTENSION_XLSX = ".xlsx";
 
     public static File convertToPdf(File inputFile, String destinationPath) throws Exception {
-        if (inputFile == null || !inputFile.exists()) {
-            throw new FileNotFoundException("找不到要转换的文件: " + inputFile.getAbsolutePath());
-        }
-        File destinationDir = null;
-        if (destinationPath == null) {
-            throw new IllegalArgumentException("请选择一个目的路径");
-        } else if (!(destinationDir = new File(destinationPath)).exists()) {
-            destinationDir.mkdirs();
-        } else if (!destinationDir.isDirectory()) {
-            throw new NotDirectoryException("目的路径不是一个有效的路径:" + destinationPath);
-        }
+        checkout(inputFile, destinationPath);
+
+        Message message = new Message();
+        File destinationFile = null;
         long startTime = System.currentTimeMillis();
-        Process process = ProcessUtil.exec(getCommand(inputFile.getAbsolutePath(), destinationPath));
-        process.waitFor();
+        if (inputFile.getName().endsWith(EXTENSION_PDF)) {
+            //本身就是pdf文档，无需转换
+            try {
+                if(!inputFile.equals(new File(destinationPath+File.separator+inputFile.getName()))) {
+                    destinationFile = FileUtil.copy(inputFile, destinationPath, inputFile.getName());
+                }else{
+                    destinationFile = inputFile;
+                }
+                message.setCode(Message.SUCCESS);
+            }catch(Exception e){
+                message.setCode(Message.FAIL);
+                message.setMessage(e.getMessage());
+            }
+        } else {
+            Process process = ProcessUtil.exec(getCommand(inputFile.getAbsolutePath(), destinationPath));
+            process.waitFor();
+            //转换结果
+            List<String> results = IOUtils.readLines(process.getInputStream());
+            if(results.get(0).startsWith("Error")){
+                message.setCode(Message.FAIL);
+                message.setMessage(Collections3.convertToString(results, "\n") + "exit code: " + process.exitValue());
+            }else {
+                message.setCode(Message.SUCCESS);
+                destinationFile = new File(destinationPath + File.separator
+                        + FilenameUtils.getBaseName(inputFile.getName())
+                        + (isXls(inputFile.getName())?EXTENSION_HTML:EXTENSION_PDF));
+            }
+        }
         long conversionTime = System.currentTimeMillis() - startTime;
 
-        //转换结果
-        List<String> results = IOUtils.readLines(process.getInputStream());
-        if (results.get(0).startsWith("Error")) {
-            throw new Exception(Collections3.convertToString(results, "\n") + "exit code: " + process.exitValue());
-        }
-        File destinationFile = new File(destinationPath + File.separator + FilenameUtils.getBaseName(inputFile.getName()) + EXTENTION_PDF);
-        if (destinationFile.exists()) {
-            logger.info(String.format("successful conversion: %s [%db] to %s in %dms", inputFile.getName(), inputFile.length(), EXTENTION_PDF, conversionTime));
+        if (Message.FAIL.equals(message.getCode()) || destinationFile==null || !destinationFile.exists()) {
+            logger.error(String.format("failed conversion: [%s] - %s", inputFile.getName(), message.getMessage()));
+            throw new Exception(message.getMessage());
+        }else {
+            logger.info(String.format("successful conversion: %s [%db] to %s in %dms", inputFile.getName(), inputFile.length(), EXTENSION_PDF, conversionTime));
             return destinationFile;
         }
-        return null;
+    }
+
+    private static void checkout(File inputFile, String destinationPath) throws FileNotFoundException, NotDirectoryException {
+        if (!FileTransmitUtil.askFileExist(inputFile)) {
+            throw new FileNotFoundException("找不到要转换的文件: " + inputFile.getAbsolutePath());
+        }
+        if (destinationPath == null) {
+            throw new IllegalArgumentException("请选择一个目的路径");
+        }
+        FileUtil.mkdirsIfNotExisted(destinationPath);
     }
 
     public static String[] getCommand(String inputFile, String outputDir) {
+        String convertTo = " pdf:writer_pdf_Export ";
+        if(isXls(inputFile)){
+            convertTo = " html ";
+        }
         return new String[]{"/bin/sh", "-c",
-                "soffice --headless --convert-to pdf:writer_pdf_Export " + inputFile + " --outdir " + outputDir
+                "soffice --headless --convert-to " + convertTo + inputFile + " --outdir " + outputDir
         };
+    }
+
+    public static boolean isXls(String fileName){
+        if(fileName!=null){
+            return fileName.endsWith(EXTENSION_XLSX) || fileName.endsWith(EXTENSION_XLS);
+        }
+        return false;
     }
 
 

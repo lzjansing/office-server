@@ -77,7 +77,14 @@ public class IndexController {
             logger.error("没有找到提供转换服务的服务器！请检查配置");
             throw new Exception("没有找到提供转换服务的服务器！");
         }
-        return serverList.get(0).view(model, req, resp);
+        for(OfficeController officeController : serverList){
+            try{
+                return officeController.view(model, req, resp);
+            }catch(Exception e){
+                logger.error(officeController.getClass().getName()+" Error : \n"+e.getMessage());
+            }
+        }
+        throw new Exception("服务器异常，请稍候再试！");
     }
 
     private String specialView(String os, Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {

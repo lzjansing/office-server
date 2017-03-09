@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by jansing on 16-12-28.
  */
-public class MyFile extends DataEntity<MyFile> {
+public class MyFile extends DataEntity<MyFile> implements Cloneable{
     private String name;
     private Integer size;
     private String version;
@@ -30,7 +30,7 @@ public class MyFile extends DataEntity<MyFile> {
     public MyFile(Map<String, Object> params) {
         String name = (String) params.get("BaseFileName");
         this.name = FilenameUtils.getBaseName(name);
-        this.ext = FilenameUtils.getExtension(name);
+        setExt(FilenameUtils.getExtension(name));
         this.size = (Integer) params.get("Size");
         this.version = (String) params.get("Version");
         this.ownerId = (String) params.get("OwnerId");
@@ -54,11 +54,13 @@ public class MyFile extends DataEntity<MyFile> {
     }
 
     public void setExt(String ext) {
-        this.ext = ext;
+        if(ext!=null && ext.length()>0){
+            this.ext = ext.startsWith(".")? ext : "."+ext;
+        }
     }
 
     public String getAbsoluteName() {
-        return getName() + "." + getExt();
+        return getName() + getExt();
     }
 
     public void setAbsoluteName(String absoluteName) {
@@ -67,7 +69,7 @@ public class MyFile extends DataEntity<MyFile> {
     }
 
     public String getRealFileName() {
-        return getId() + "." + getExt();
+        return getId() + getExt();
     }
 
     public Integer getSize() {
@@ -132,5 +134,10 @@ public class MyFile extends DataEntity<MyFile> {
 
     public void setAppFileId(String appFileId) {
         this.appFileId = appFileId;
+    }
+
+    @Override
+    public MyFile clone() throws CloneNotSupportedException {
+        return (MyFile) super.clone();
     }
 }

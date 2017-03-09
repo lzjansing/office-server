@@ -5,7 +5,7 @@ import com.jansing.common.persistence.DataEntity;
 /**
  * Created by jansing on 16-12-28.
  */
-public class MyFileCache extends DataEntity<MyFileCache> {
+public class MyFileCache extends DataEntity<MyFileCache> implements Cloneable{
     private MyFile myFile;
     private String originPath;
     private String convertPath;
@@ -41,5 +41,12 @@ public class MyFileCache extends DataEntity<MyFileCache> {
 
     public void setServletPath(String servletPath) {
         this.servletPath = servletPath;
+    }
+
+    @Override
+    protected MyFileCache clone() throws CloneNotSupportedException {
+        MyFileCache cache = (MyFileCache) super.clone();
+        cache.setMyFile(myFile.clone());
+        return cache;
     }
 }
