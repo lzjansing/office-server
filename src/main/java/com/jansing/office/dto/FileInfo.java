@@ -21,12 +21,12 @@ public class FileInfo {
     public FileInfo() {
     }
 
-    public FileInfo(Map<String, Object> params) {
-        this.name = (String) params.get("BaseFileName");
-        this.size = (Integer) params.get("Size");
-        this.version = (String) params.get("Version");
-        this.ownerId = (String) params.get("OwnerId");
-        this.sha256 = (String) params.get("SHA256");
+    public FileInfo(Map<String, String> params) {
+        this.name = params.get("BaseFileName");
+        this.size = Integer.parseInt(params.get("Size"));
+        this.version = params.get("Version");
+        this.ownerId = params.get("OwnerId");
+        this.sha256 = params.get("SHA256");
     }
 
     public FileInfo(String json) {

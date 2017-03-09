@@ -27,14 +27,14 @@ public class MyFile extends DataEntity<MyFile> implements Cloneable {
     public MyFile() {
     }
 
-    public MyFile(Map<String, Object> params) {
-        String name = (String) params.get("BaseFileName");
+    public MyFile(Map<String, String> params) {
+        String name = params.get("BaseFileName");
         this.name = FilenameUtils.getBaseName(name);
         setExt(FilenameUtils.getExtension(name));
-        this.size = (Integer) params.get("Size");
-        this.version = (String) params.get("Version");
-        this.ownerId = (String) params.get("OwnerId");
-        this.sha256 = (String) params.get("SHA256");
+        this.size = Integer.parseInt(params.get("Size"));
+        this.version = params.get("Version");
+        this.ownerId = params.get("OwnerId");
+        this.sha256 = params.get("SHA256");
     }
 
     public MyFile(String json) {
