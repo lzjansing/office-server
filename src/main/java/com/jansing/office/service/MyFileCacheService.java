@@ -33,16 +33,19 @@ public class MyFileCacheService extends CrudService<MyFileCacheDao, MyFileCache>
     }
 
     @Override
+    @Deprecated
     public MyFileCache get(String id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @Deprecated
     public List<MyFileCache> findList(MyFileCache entity) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @Deprecated
     public Page<MyFileCache> findPage(Page<MyFileCache> page, MyFileCache entity) {
         throw new UnsupportedOperationException();
     }

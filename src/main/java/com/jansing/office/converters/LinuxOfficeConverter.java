@@ -7,13 +7,13 @@ import com.jansing.web.utils.FileTransmitUtil;
 import com.jansing.web.utils.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by jansing on 16-12-17.
@@ -34,37 +34,37 @@ public class LinuxOfficeConverter {
         if (inputFile.getName().endsWith(EXTENSION_PDF)) {
             //本身就是pdf文档，无需转换
             try {
-                if(!inputFile.equals(new File(destinationPath+File.separator+inputFile.getName()))) {
+                if (!inputFile.equals(new File(destinationPath + File.separator + inputFile.getName()))) {
                     destinationFile = FileUtil.copy(inputFile, destinationPath, inputFile.getName());
-                }else{
+                } else {
                     destinationFile = inputFile;
                 }
                 message.setCode(Message.SUCCESS);
-            }catch(Exception e){
+            } catch (Exception e) {
                 message.setCode(Message.FAIL);
                 message.setMessage(e.getMessage());
             }
         } else {
             Process process = ProcessUtil.exec(getCommand(inputFile.getAbsolutePath(), destinationPath));
             process.waitFor();
-            //转换结果
+
             List<String> results = IOUtils.readLines(process.getInputStream());
-            if(results.get(0).startsWith("Error")){
+            if (results.get(0).startsWith("Error")) {
                 message.setCode(Message.FAIL);
                 message.setMessage(Collections3.convertToString(results, "\n") + "exit code: " + process.exitValue());
-            }else {
+            } else {
                 message.setCode(Message.SUCCESS);
                 destinationFile = new File(destinationPath + File.separator
                         + FilenameUtils.getBaseName(inputFile.getName())
-                        + (isXls(inputFile.getName())?EXTENSION_HTML:EXTENSION_PDF));
+                        + (isXls(inputFile.getName()) ? EXTENSION_HTML : EXTENSION_PDF));
             }
         }
         long conversionTime = System.currentTimeMillis() - startTime;
 
-        if (Message.FAIL.equals(message.getCode()) || destinationFile==null || !destinationFile.exists()) {
+        if (Message.FAIL.equals(message.getCode()) || destinationFile == null || !destinationFile.exists()) {
             logger.error(String.format("failed conversion: [%s] - %s", inputFile.getName(), message.getMessage()));
             throw new Exception(message.getMessage());
-        }else {
+        } else {
             logger.info(String.format("successful conversion: %s [%db] to %s in %dms", inputFile.getName(), inputFile.length(), EXTENSION_PDF, conversionTime));
             return destinationFile;
         }
@@ -82,7 +82,7 @@ public class LinuxOfficeConverter {
 
     public static String[] getCommand(String inputFile, String outputDir) {
         String convertTo = " pdf:writer_pdf_Export ";
-        if(isXls(inputFile)){
+        if (isXls(inputFile)) {
             convertTo = " html ";
         }
         return new String[]{"/bin/sh", "-c",
@@ -90,8 +90,8 @@ public class LinuxOfficeConverter {
         };
     }
 
-    public static boolean isXls(String fileName){
-        if(fileName!=null){
+    public static boolean isXls(String fileName) {
+        if (fileName != null) {
             return fileName.endsWith(EXTENSION_XLSX) || fileName.endsWith(EXTENSION_XLS);
         }
         return false;

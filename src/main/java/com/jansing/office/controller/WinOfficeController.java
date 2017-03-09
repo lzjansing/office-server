@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.jansing.common.config.Global;
 import com.jansing.web.utils.FileUtil;
 import com.jansing.web.utils.StringUtil;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,6 @@ public class WinOfficeController extends OfficeController {
 
     private static String owaServerPath = Global.getConfig("convert.win.serverPath");
 
-    //todo 这种方法可以？httpclient的形式访问
     @RequestMapping(value = "/winView", method = RequestMethod.GET)
     public String view(Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         if (StringUtil.isBlank(owaServerPath)) {
@@ -40,8 +40,8 @@ public class WinOfficeController extends OfficeController {
             resp.setStatus(HttpServletResponse.SC_OK);
             return null;
         } finally {
-            in.close();
-            out.close();
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(out);
         }
     }
 

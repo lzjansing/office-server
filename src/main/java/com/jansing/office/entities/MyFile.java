@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by jansing on 16-12-28.
  */
-public class MyFile extends DataEntity<MyFile> implements Cloneable{
+public class MyFile extends DataEntity<MyFile> implements Cloneable {
     private String name;
     private Integer size;
     private String version;
@@ -54,8 +54,8 @@ public class MyFile extends DataEntity<MyFile> implements Cloneable{
     }
 
     public void setExt(String ext) {
-        if(ext!=null && ext.length()>0){
-            this.ext = ext.startsWith(".")? ext : "."+ext;
+        if (ext != null && ext.length() > 0) {
+            this.ext = ext.startsWith(".") ? ext : "." + ext;
         }
     }
 

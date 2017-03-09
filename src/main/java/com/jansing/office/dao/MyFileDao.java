@@ -9,7 +9,4 @@ import com.jansing.office.entities.MyFile;
  */
 @MyBatisDao
 public interface MyFileDao extends CrudDao<MyFile> {
-//    T get(String var1);
-//    List<T> findList(T var1);
-//    int update(T var1);
 }

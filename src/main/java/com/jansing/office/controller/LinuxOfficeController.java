@@ -1,9 +1,6 @@
 package com.jansing.office.controller;
 
-import com.beust.jcommander.internal.Maps;
 import com.jansing.common.config.Global;
-import com.jansing.common.mapper.JsonMapper;
-import com.jansing.common.utils.Message;
 import com.jansing.office.converters.LinuxOfficeConverter;
 import com.jansing.office.entities.ConvertLog;
 import com.jansing.office.entities.MyFile;
@@ -12,7 +9,6 @@ import com.jansing.office.service.MyFileCacheService;
 import com.jansing.office.service.MyFileService;
 import com.jansing.web.utils.FileTransmitUtil;
 import com.jansing.web.utils.FileUtil;
-import com.jansing.web.utils.StringUtil;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,11 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Map;
 
 /**
  * Created by jansing on 16-12-24.
@@ -51,24 +45,23 @@ public class LinuxOfficeController extends OfficeController {
         String remoteContextPath = req.getParameter("host");
         String fileInfoUrl = remoteContextPath + callbackServletPath + "/" + fileId;
         String fileUrl = fileInfoUrl + "/contents";
-        //保存文件的路径
-        String convertPath = FileTransmitUtil.getRealPath(req, CONVERT_PATH)
+        String savePath = FileTransmitUtil.getRealPath(req, CONVERT_PATH)
                 + File.separator + LocalDate.now().toString();
 
         MyFile myFile = new MyFile(httpClientUtil.doGet(fileInfoUrl, null));
-        MyFileCache cache = ensureOriginExits(req, myFile, fileUrl, convertPath);
+        MyFileCache cache = ensureOriginExits(req, myFile, fileUrl, savePath);
         long convertStart = System.currentTimeMillis();
-        ensureConvertExits(req, cache, convertPath);
+        ensureConvertExits(req, cache, savePath);
         long convertEnd = System.currentTimeMillis();
 
-        if(cache.getId()==null || !cache.getConvertPath().equals(myFileCacheService.get(cache).getConvertPath())){
+        if (cache.getId() == null || !cache.getConvertPath().equals(myFileCacheService.get(cache).getConvertPath())) {
             myFileCacheService.save(cache);
-            convertLog.setConvertCost(convertEnd-convertStart);
+            convertLog.setConvertCost(convertEnd - convertStart);
         }
 
         model.addAttribute("fileName", myFile.getName());
         model.addAttribute("file", cache.getConvertPath());
-        if(LinuxOfficeConverter.isXls(myFile.getExt())){
+        if (LinuxOfficeConverter.isXls(myFile.getExt())) {
             return "xlsViewer";
         }
         return "/viewer";
@@ -87,7 +80,7 @@ public class LinuxOfficeController extends OfficeController {
                 cache = tmpCache;
             }
             myFile = old;
-        }else {
+        } else {
             myFileService.save(myFile);
             myFile = myFileService.get(myFile);
             cache.setMyFile(myFile);
@@ -98,11 +91,10 @@ public class LinuxOfficeController extends OfficeController {
     }
 
     /**
-     *
      * @param fileUrl
      * @param savePath
      * @param myFile
-     * @return  获取到的文件的绝对路径
+     * @return 获取到的文件的绝对路径
      * @throws Exception
      */
     public String getFile(MyFile myFile, String fileUrl, String savePath) throws Exception {
@@ -120,7 +112,7 @@ public class LinuxOfficeController extends OfficeController {
     }
 
     public void ensureConvertExits(HttpServletRequest req, MyFileCache cache, String savePath) throws Exception {
-        if(!FileTransmitUtil.askFileExist(cache.getConvertPath(), req)){
+        if (!FileTransmitUtil.askFileExist(cache.getConvertPath(), req)) {
             cache.setConvertPath(FileTransmitUtil.getRelativePath(req,
                     convertFile(FileTransmitUtil.getRealPath(req, cache.getOriginPath()), savePath)));
         }

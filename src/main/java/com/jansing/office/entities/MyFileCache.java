@@ -5,7 +5,7 @@ import com.jansing.common.persistence.DataEntity;
 /**
  * Created by jansing on 16-12-28.
  */
-public class MyFileCache extends DataEntity<MyFileCache> implements Cloneable{
+public class MyFileCache extends DataEntity<MyFileCache> implements Cloneable {
     private MyFile myFile;
     private String originPath;
     private String convertPath;

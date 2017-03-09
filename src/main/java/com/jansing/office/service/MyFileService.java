@@ -31,16 +31,19 @@ public class MyFileService extends CrudService<MyFileDao, MyFile> {
     }
 
     @Override
+    @Deprecated
     public MyFile get(String id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @Deprecated
     public List<MyFile> findList(MyFile entity) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @Deprecated
     public Page<MyFile> findPage(Page<MyFile> page, MyFile entity) {
         throw new UnsupportedOperationException();
     }

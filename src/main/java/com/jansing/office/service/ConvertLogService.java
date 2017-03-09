@@ -23,11 +23,13 @@ public class ConvertLogService extends CrudService<ConvertLogDao, ConvertLog> {
     }
 
     @Override
+    @Deprecated
     public ConvertLog get(String id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @Deprecated
     public List<ConvertLog> findList(ConvertLog entity) {
         throw new UnsupportedOperationException();
     }
@@ -38,6 +40,7 @@ public class ConvertLogService extends CrudService<ConvertLogDao, ConvertLog> {
     }
 
     @Override
+    @Deprecated
     public void delete(ConvertLog entity) {
         throw new UnsupportedOperationException();
     }

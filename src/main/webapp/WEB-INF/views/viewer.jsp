@@ -28,10 +28,6 @@
             var file = "${ctx.concat('index.pdf')}";
         </c:otherwise>
         </c:choose>
-        //todo
-//        if(file.endsWith('.xls') || file.endsWith(".xlsx")){
-//            window.location.href=file;
-//        }
     </script>
     <script src="${ctxFront}/plugins/pdf/l10n.js"></script>
     <script src="${ctxFront}/plugins/pdf/viewer.js"></script>
@@ -108,10 +104,6 @@
                     <span data-l10n-id="bookmark_label">Current View</span>
                 </a>
 
-                <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="55" data-l10n-id="hand_tool_enable">
-                    <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
-                </button>
-
                 <div class="horizontalToolbarSeparator visibleLargeView"></div>
 
                 <button id="firstPage" class="secondaryToolbarButton firstPage" title="Go to First Page" tabindex="56" data-l10n-id="first_page">
@@ -131,6 +123,10 @@
                 </button>
 
                 <div class="horizontalToolbarSeparator"></div>
+
+                <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="55" data-l10n-id="hand_tool_enable">
+                    <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
+                </button>
 
                 <%--<div class="horizontalToolbarSeparator"></div>--%>
 
