@@ -104,5 +104,20 @@ public class FooTest {
         System.out.println(new File("/home/jansing/wen/src/office-server/target/libreoffice-first/convertFile/2017-03-09/1cd23890c8704edfa6d7a26df04163b3.pdf").length());
     }
 
+    @Test
+    public void test11(){
+        System.out.println(new File("").getAbsolutePath());
+        String filePath = null;
+        System.out.println(new File(filePath).getAbsolutePath());
+    }
+
+    @Test
+    public void test12(){
+        String str1 = "/home/jansing/wen/src/office-server/target";
+        String str2 = "/home/jansing/wen/src/office-server/";
+        String str3 = "/home/jansing/wen/src/office-server";
+        System.out.println(str1.substring(str2.length()));
+        System.out.println(str1.substring(str3.length()));
+    }
 
 }

@@ -13,7 +13,7 @@
 </head>
 <body>
 <script type="application/javascript">
-    window.location.href="${ctx}${file}";
+    window.location.href="${fn:startsWith(file, 'http://')?file:ctx.concat(file)}";
 </script>
 </body>
 </html>
